@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var att_notice = json.att_notice || "";
+        if (att_notice != "") {
+            var noticeLogo = att_notice.logo || "images/icon_att_notice.png";
+            var noticeTitle = att_notice.title || "";
+            var noticeCon = att_notice.content || "";
+            var sourceType = att_notice.sourceType;
+            if (sourceType == 0) {
+            	// 通知
+            	noticeLogo = 'http://p.ananas.chaoxing.com/star3/origin/02a6d4377246d85f904f0e92394895ee.png';
+            } else if (sourceType = 1000) {
+            	// 站内信函
+            	noticeLogo = 'http://p.ananas.chaoxing.com/star3/origin/1f699a05390ef07f54d27e9b9d396f66.png';
+            }
+            if(noticeTitle=="" && noticeCon==""){
+                if(att_notice.imgs && att_notice.imgs.length>0){
+                	noticeTitle="图片";
+                }else{
+                	noticeTitle="通知";
+                }
+            }
+            var html = '<div class="attach_item insertNotice">'+
+                            '<div class="img"><img src="'+noticeLogo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2>'+noticeTitle+'</h2>'+
+                                '<p class="aside">'+noticeCon+'</p>'+
+                                '<p class="from">来自-<span class="blue">通知</span></p>'+
+                            '</div>'+
+                        '</div>';
+            $(".attach-box").append(html);
+            
+            if(json.cid){
+                var cid=json.cid;
+                if(noticeTitle!='' && noticeCon==''){//只有标题
+                    $('.attach_infor h2').css('white-space','normal');
+                    $('.attach_infor h2').each(function(index, element) {
+                        $clamp(element, { clamp: 2, useNativeClamp: false });
+                    });
+                }else if(noticeTitle=='' && noticeCon!=''){//只有正文
+                    $('.attach_infor .aside').css('white-space','normal');
+                    $('.attach_infor .aside').addClass('beTitle');
+                    $('.attach_infor .aside').each(function(index, element) {
+                        $clamp(element, { clamp: 2, useNativeClamp: false });
+                    });
+                }else if(noticeTitle!='' && noticeCon!=''){//标题和正文同时存在
+                    $('.attach_infor .aside').css('white-space','normal')
+                    $('.attach_infor .aside').each(function(index, element) {
+                        $clamp(element, { clamp: 2, useNativeClamp: false });
+                    });
+                    var u = navigator.userAgent;
+                    var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+                    var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    if(isAndroid || isIOS){
+                        if($('.attach_infor .aside').height()>$('.attach_infor .aside').css('line-height').substr(0,$('.attach_infor .aside').css('line-height').length-2)){
+                            $('.attach_item').height(90);
+                        }
+                    }else{
+                        if($('.attach_infor .aside').height()>$('.attach_infor .aside').css('line-height').substr(0,$('.attach_infor .aside').css('line-height').length-2)){
+                            $('.attach_item').height(120);
+                        }
+                    }
+                }
+            }
+            
+            var top_parent = RichtextAttachmentUtils.getTopParent();
+            if(top_parent) {
+                // 修改附件高度
+            	top_parent.postMessage({'msgType':'heightChanged','cid': cid, 'height':$('.attach-box').height()}, '*');
+            }
+        }
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var att_note = json.att_note || "";
+        if (att_note != "") {
+            var att_note_title = att_note.title || "";
+            var att_note_contentTxt = att_note.contentTxt || "";
+            var att_note_creatorName = att_note.creatorName || "";
+            if(att_note_title == "" && att_note_contentTxt == "") {
+            	if(att_note.images && att_note.images.length>0){
+            		att_note_title = "图片";
+            	} else {
+            		att_note_title = "笔记";
+            	}
+            }
+            if(att_note.images && att_note.images.length>0){
+                var img=att_note.images[0];
+                img = img.replace(/.webp/g, '.jpg');
+                if (img.indexOf("chaoxing.com") != -1) {
+                    img = img.replace(/origin/g, '100_100cQ50');
+                }
+                var html = '<div class="attach_item insertNote">'+
+                                '<div class="img squareRadius"><img src="'+img+'"></div>'+
+                                '<div class="attach_infor">'+
+                                    '<h2>'+att_note_title+'</h2>'+
+                                    '<p class="aside">'+att_note_contentTxt+'</p>'+
+                                    '<p class="from">来自-<span class="blue">'+att_note_creatorName+'</span>的笔记</p>'+
+                                '</div>'+
+                            '</div>';
+            }else{
+                var html = '<div class="attach_item insertNote clearfix">'+
+                                '<div class="attach_infor">'+
+                                    '<h2>'+att_note_title+'</h2>'+
+                                    '<p class="aside">'+att_note_contentTxt+'</p>'+
+                                    '<p class="from">来自-<span class="blue">'+att_note_creatorName+'</span>的笔记</p>'+
+                                '</div>'+
+                            '</div>';
+            }
+            $(".attach-box").append(html);
+            if(json.cid){
+                var cid=json.cid;
+                if(att_note_title!='' && att_note_contentTxt==''){//只有标题
+                    $('.attach_infor h2').css('white-space','normal');
+                    $('.attach_infor h2').each(function(index, element) {
+                        $clamp(element, { clamp: 2, useNativeClamp: false });
+                    });
+                }else if(att_note_title=='' && att_note_contentTxt!=''){//只有正文
+                    $('.attach_infor .aside').css('white-space','normal');
+	                /* if('${source}' == 'screenDetail') {
+	                	// 投屏页样式
+                        $('.attach_infor .aside').addClass('beTitle')
+	                } else {
+	                	// 非投屏页样式
+	                	$('.attach_infor .aside').css({'font-size':'15px!important','color':'#333333','line-height':'1.23'});
+	                } */
+	                $('.attach_infor .aside').addClass('beTitle');
+                    $('.attach_infor .aside').each(function(index, element) {
+                        $clamp(element, { clamp: 2, useNativeClamp: false });
+                    });
+                }else if(att_note_title!='' && att_note_contentTxt!=''){//标题和正文同时存在
+                    $('.attach_infor .aside').css('white-space','normal')
+                    $('.attach_infor .aside').each(function(index, element) {
+                        $clamp(element, { clamp: 2, useNativeClamp: false });
+                    });
+                    var u = navigator.userAgent;
+                    var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+                    var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    if(isAndroid || isIOS){
+                        if($('.attach_infor .aside').height()>$('.attach_infor .aside').css('line-height').substr(0,$('.attach_infor .aside').css('line-height').length-2)){
+                            $('.attach_item').height(90);
+                        }
+                    }else{
+                        if($('.attach_infor .aside').height()>$('.attach_infor .aside').css('line-height').substr(0,$('.attach_infor .aside').css('line-height').length-2)){
+                            $('.attach_item').height(120);
+                        }
+                    }
+                }
+                var top_parent = RichtextAttachmentUtils.getTopParent();
+                if(top_parent) {
+                    // 修改附件高度
+                	top_parent.postMessage({'msgType':'heightChanged','cid': cid, 'height':$('.attach-box').height()}, '*');
+                }
+            }
+        }
+        
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

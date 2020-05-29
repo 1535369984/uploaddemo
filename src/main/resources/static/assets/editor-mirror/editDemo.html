@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="ueditor4thirdparty/rich.text.util.js"></script>
+<body>
+<script type="text/javascript"> 
+	function customUploadDataAnalysis(responseJson) {
+		var returnData = {
+			result : responseJson.result,
+			msg : responseJson.msg,
+		}
+
+		var data = {
+		}
+		if (responseJson.result) {
+			if ("jpg|jpeg|png|gif|bmp|webp".indexOf(responseJson.data.suffix) > -1) {
+			// 图片
+			data.imgUrl = 'http://p.ananas.chaoxing.com/star3/origin/'+ responseJson.data.objectId + "." + responseJson.data.suffix;
+			} else {
+				// 文件
+				data.downloadUrl = 'http://d0.ananas.chaoxing.com/download/' + responseJson.data.objectId;
+			}
+			// 如果是视频，需要视频封面和播放地址
+			// 视频封面
+			data.thumbnail = responseJson.data.thumbnail || '';
+			// 视频播放地址
+			data.playUrl = responseJson.data.videoPlayUrl || '';
+
+			// 测试用
+			data.playUrl = 'https://s1.ananas.chaoxing.com/video/00/7a/d5/fb9086062883db0ba9f616aa998e4cf2/sd.mp4?at_=1590634701768&ak_=46f0bdb77229260c62c31c2bbab192e1&ad_=163029e2236e4e7316cf58dc8f45e975'
+			
+			returnData.data = data;
+		}
+		return returnData;
+	}
+	RichTextUitl.loadEditorProfile(true, true, customUploadDataAnalysis);
+</script>
+<div class="wrap">
+<script id="container" name="content" type="text/plain"></script>
+</div>
+<script type="text/javascript"> RichTextUitl.initUEditor(800); </script>
+<!--<script type="text/javascript">-->
+<!--	/**-->
+<!--	 * 获取上传文件到云盘需要的参数，自定义上传地址时不需要这个-->
+<!--	 */-->
+<!--	$.ajax({-->
+<!--		url : "https://noteyd.chaoxing.com/pc/files/getUploadConfig",-->
+<!--		type : "get",-->
+<!--		xhrFields: {-->
+<!--            withCredentials: true-->
+<!--        },-->
+<!--		data : {},-->
+<!--		dataType : "json",-->
+<!--		success : function(resultData) {-->
+<!--			if (resultData && resultData.result == 1) {-->
+<!--				RichTextUitl.puid = resultData.msg.puid;-->
+<!--				RichTextUitl.token = resultData.msg.token;-->
+<!--			}-->
+<!--		},-->
+<!--		error : function() {-->
+<!--		}-->
+<!--	});-->
+<!--</script>-->
+</body>
+</html>

@@ -1,0 +1,40 @@
+
+img {
+    display: block;
+    margin: 0.15rem auto;
+    max-width: 100%;
+}
+/*表格*/
+.table {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    margin-bottom: 0.2rem;
+    border-collapse: collapse;
+    display: table;
+}
+
+table th, table td {
+    min-width:1.4rem;
+    border: solid 1px #ebebeb;
+    padding: 5px 10px;
+}
+/*附件*/
+iframe.attach-module {
+    display: block;
+    width: 100% !important;
+    height: 2.3rem !important;
+    margin: 0.15rem 0;
+    border-radius: 0.08rem;
+}
+
+ol .attach-module, ul .attach-module {
+    margin-left: -20px;
+}
+
+iframe.attach-insertLive {
+    height: 2.65rem!important;
+}

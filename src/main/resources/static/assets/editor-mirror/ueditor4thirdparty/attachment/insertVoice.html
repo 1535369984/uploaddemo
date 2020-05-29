@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<script type="text/javascript">
+insertVoice = {
+    hasChangedEvent:function(){}
+}
+</script>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body onhashchange="insertVoice.hasChangedEvent()">
+    <div class="attach-box" id="attach-box"><div class="delAttachment" style="display:none;"></div></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/tips.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <script type="text/javascript" src="js/audio.js" ></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <link type="text/css" rel="stylesheet" href="css/pop.css"/>
+    <style>
+        @keyframes rotate{  from{transform: rotate(0);} to{transform: rotate(360deg);} }
+        .audio-content{display: none; height: 18px;}
+        /*进度条*/
+        .audio-progress { position: relative; float: left; width: calc(100% - 90px); height: 2px; margin: 7px 10px 0 0; background: #eee; }
+        .audio-progress .audio-progress-detail { height: 100%; width: 100%; background: #ebebeb; position: relative; cursor: pointer; }
+        .audio-progress .audio-progress-detail .audio-voice-p { width: 0%; position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow: hidden; background: #0099ff; z-index: 2; }
+        .audio-progress .audio-progress-detail .audio-buffer-p { width: 0%; position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow: hidden; background: #d9d9d9; z-index: 1; }
+        .audio-progress .audio-origin-bar { position: absolute; top: 0; left: 0; width: calc(100% - 12px); height: auto; }
+        .audio-progress .audio-origin { position: absolute; left: 0; top: 50%; z-index: 2; width: 12px; height: 12px; margin-top: -6px; margin-left: 0; border-radius: 50%; -moz-border-radius: 50%; -webkit-border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 0 3px 1px #ebebeb; }
+        .audio-progress .audio-origin.loading { animation: rotate 1s linear infinite; background-image: url(images/loadingmini.png); background-size: 10px 10px; background-position: center center;  background-repeat: no-repeat; }
+        /*正在加载*//*时间进度*/
+        .audio-loading-text,.audio-time {display: none; float: left; width: 80px; height: 18px; line-height: 18px; font-size: 11px; color: #999999;}
+        
+        /*加载中*/
+        .loading .audio-loading-text{display: block;}
+        .loading .audio-time{display: none;}
+        .loading .audio-content {display: block;}
+        .loading .audio-origin { animation: rotate 1s linear infinite; background-image: url(images/loadingmini.png); background-size: 10px 10px; background-position: center center; background-repeat: no-repeat; }
+        .loading .aside{display: none;}
+        /*播放状态*/
+        .play .voiceImg {background: url(images/voice.gif) left center/auto 58px no-repeat;}
+        .play .audio-loading-text{display: none;}
+        .play .audio-time{display: block;}
+        .play .audio-content {display: block;}
+        .play .audio-origin{background-image: none;}
+        .play .aside{display: none;}
+        /*暂停状态*/
+        .pause .voiceImg{background: url(images/voice.png) left center/auto 58px no-repeat;}
+        .pause .audio-loading-text{display: none;}
+        .pause .audio-time{display: block;}
+        .pause .audio-content {display: block;}
+        .pause .audio-origin{background-image: none;}
+        .pause .aside{display: none;}
+        
+        @media only screen and (max-width: 690px){
+            .playmask {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        @media only screen and (min-width: 690px){
+            .playmask {
+                width: 58px;
+                height: 58px;
+            }
+        }
+        
+         /*20200429 支持录音重命名*/
+        .voiceIcon{
+        	display: none;
+        	position: relative;
+		    top: -4px;
+		    width: 12px;
+		    height: 12px;
+		    background: url(images/editTitle.png) center center / 12px 12px;
+		    margin-left: 12px;
+		} 
+		.rename_con{
+			display: none;
+			position: relative;
+		    height: 30px;
+		}
+		.rename_con .rename_input{
+			position: static;
+		    width: 200px;
+		    height: 30px;
+		    line-height: 24px;
+		    padding: 2px 7px;
+		    font-size: 14px;
+		    color: #333;
+		    background: #FFFFFF;
+		    border: 1px solid #CCDEF3;
+		    border-radius: 4px;
+		}
+		.rename_yes, .rename_no {
+		    float: left;
+		    display: block;
+		    width: 24px;
+		    height: 24px;
+		    background: url(images/rename_ico.png) no-repeat;
+		    overflow: hidden;
+		    margin-top: 3px;
+		}
+		.rename_yes {
+		    background-position: 0 0;
+		    margin-left: 14px;
+		}
+		.rename_no {
+		    background-position: -30px 0;
+		    margin-left: 10px;
+		}
+		.attach_item.edit .attach_infor h2{
+	       	display: inline-block;
+	       	max-width: 100%;
+	       	width: auto;
+	    }
+	    .attach_item.edit .voiceIcon{
+	    	display: inline-block;
+	    }
+    </style>
+    <script type="text/javascript">
+        var voiceUrl = "";
+        var url = RichtextAttachmentUtils.getTopDomain();
+	    if(url && (url.indexOf("noteRichtextEdit") > -1 || url.indexOf("noteRichtextCreate") > -1)) {
+	    	$('.delAttachment').show();
+	    }
+	    var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+	    try{
+	        json = JSON.parse(jsonOld);
+	    }catch(e){
+	        console.log(e);
+	        json = "";
+	    }
+	    var att_voice = json.att_voice || "";
+	    var cid = json.cid || "";
+	    insertVoice.hasChangedEvent = function() {
+            var top_parent = RichtextAttachmentUtils.getTopParent();
+            if(json) {
+                cid = json.att_voice.cid;
+                top_parent.postMessage({'msgType': 'dataChanged', 'cid':json.att_voice.cid}, '*');
+                /* try{
+                       // 根据cid重新获取父级的name值
+                       if(parent && parent.window && parent.window.document) {
+                           jsonOld = $(parent.window.document).find('iframe[cid="'+ cid +'"]')[0].name;
+                           json = JSON.parse(jsonOld);
+                           if(json) {
+                               att_video = json.att_video;
+                               //var errorImg = "javascript:this.src='/res/pc/images/richtext/icon_gray.png';";
+                               var videoLogo = att_video.coverUrl || "/res/pc/images/richtext/icon_gray.png";
+                               $(".attach-box").find('img').eq(0).attr('src', videoLogo);
+                           }
+                       }
+                   }catch(e){
+                       console.log(e);
+                       json = "";
+                   } */
+            }
+        }
+	    if(json == ""){
+	    	//alert("获取信息失败");
+	    }
+	    if (att_voice != "") {
+	    	var titleEdited = att_voice.titleEdited || "";
+            if(titleEdited == 1){
+                var fileName = att_voice.fileTitle || "";
+            }else{
+                var fileName = timeformat(att_voice.voiceLength || 0);
+            }
+            fileSize = att_voice.fileLength || 0;
+            if(typeof fileSize == "number"){//如果是纯数字，则自动进阶保留一位小数
+                fileSize = sizeformat(fileSize);
+            }
+            
+         	//是否显示音频重命名
+            var isShowRenameIcon = false;
+            if('${enableEdit}' == '1') {
+            	isShowRenameIcon = true;
+            }
+            
+            //20200429 加重命名
+            var html = '<div class="attach_item insertVoice">'+
+                            '<div class="voiceImg"></div>'+
+                            '<div class="attach_infor">'+
+                                '<div class="titM"><h2>'+fileName+'</h2><b class="voiceIcon"></b></div>'+
+                                '<div class="rename_con" style="display: none;">'+
+									'<input type="text" name="text" value="" class="rename_input clickName fl" autocomplete="off">'+
+									'<a class="rename_yes" href="javascript:void(0)"></a>'+
+									'<a class="rename_no" href="javascript:void(0)"></a>'+
+								'</div>'+
+                                '<p class="aside">'+fileSize+'</p><div class="audio-content"></div>'+
+                            '</div>'+
+                        '</div>';
+            $(".attach-box").append(html);
+            if(isShowRenameIcon){
+            	$('.attach_item').addClass('edit')
+            }
+	    }
+	    
+	    //20200429 加重命名方法
+	    $('.attach-box').on('click','.voiceIcon',function(e){
+	    	e.stopPropagation()
+	    	$(this).parents('.titM').hide();
+	    	$(this).parents('.attach_infor').find('.rename_con').show();
+	    	$(this).parents('.attach_infor').find('.rename_input').focus();
+	    });
+	    
+		$('.attach-box').on('click','.attach_infor .rename_con',function(ev){
+			ev.stopPropagation();
+		});
+	    
+	    $('.attach-box').on('click','.rename_yes',function(ev){
+			ev.stopPropagation();
+			var text = $(this).parents('.rename_con').find('.rename_input').val();
+			if(text.length == 0){
+				errorTips("录音名称不为空");
+				return;
+			}
+			//超过16字提示
+			if(text.length > 16){
+				errorTips("录音名称最多支持16个字哦");
+				return;
+			}
+			$(this).parents('.attach-box').find('.titM').show();
+			$(this).parents('.attach-box').find('.rename_con').hide();
+			$(this).parents('.attach-box').find('h2').html(text);
+			//修改数据
+			try {
+				if(parent && parent.window && parent.window.document) {
+					var iframeDom = $(parent.window.document).find('iframe[cid="'+ cid +'"]')[0];
+					if(iframeDom && iframeDom.length > 0){
+						json.att_voice.fileTitle = text;
+						json.att_voice.titleEdited = 1;
+						var newData = JSON.stringify(json);
+						iframeDom.attr("name", btoa(encodeURIComponent(str)));
+					}
+				}
+			} catch (e) {
+// 				console.log(e);
+				//跨域通过postMessage
+				json.att_voice.fileTitle = text;
+				json.att_voice.titleEdited = 1;
+				var newData = json;
+				var top_parent = RichtextAttachmentUtils.getTopParent();
+				top_parent.postMessage({'msgType':'dataChanged2','cid': cid , newData:newData}, '*');
+			}
+		})
+		$('.attach-box').on('click','.rename_no',function(ev){
+			ev.stopPropagation();
+			$(this).parents('.attach-box').find('.titM').show();
+			$(this).parents('.attach-box').find('.rename_con').hide();
+		});
+	    
+	    //文件大小格式
+	    function sizeformat(bytes){
+	        if (bytes / 1024 > 1) {
+	            if (bytes / (1024 * 1024) > 1) {
+	                return "" + (bytes/(1024 * 1024)).toFixed(1) + "MB";
+	            } else {
+	                return "" + parseInt(bytes/1024) + "KB";
+	            }
+	        } else {
+	            return "" + bytes + "B";
+	        }
+	    }
+	    //时间格式化
+	    function timeformat(limit){
+	        if(!limit){  
+	            return "0秒";
+	        }
+	        limit = parseInt(limit);
+	        var index=0;    
+	        var timeUnit=new Array('秒','分','小时');
+	        var timeArray = new Array();
+	        if(limit>=60){
+	            while(limit>=60){//数字部分1到60之间
+	                timeArray.push(limit%60);
+	                limit = parseInt(limit/60);
+	                index += 1;
+	            };
+	        }
+	        timeArray.push(limit);
+	        var timeFormat = "";
+	        for(var i=timeArray.length-1;i>=0;i--){
+	            timeFormat += timeArray[i]+timeUnit[i];
+	        }
+	        return timeFormat;    
+	    }
+	    $('.delAttachment').click(function(e){
+	    	e.stopPropagation();
+	    	window.parent.parent.removeAttachment(json.cid);
+	    })
+	    
+	    var audioUrl = '';
+	    // 播放音视频方法
+        function playAudio(callback) {
+            if(!audioUrl) {
+                $.ajax({
+                    url : "/screen/note_note/files/status/" + att_voice.objectId2, // 投屏下的获取资源信息的方法不需要登录
+                    type : "get",
+                    data : {isMedia:true},
+                    dataType : "json",
+                    success : function(backData) {
+                        if(backData&&backData["status"]&&backData["status"]==true&&(backData["url"]||"")!=""){
+                        	audioUrl = backData["url"];
+                            callback();
+                        }else{
+                            if(backData && backData["msg"] && (backData["msg"]||"") != ""){
+                                $('.aside').text(backData["msg"]);
+                            }else{
+                                $('.aside').text("暂时无法播放，请稍后再试。。。");
+                            }
+                        }
+                    },
+                    error : function(xhr ,textStatus ,errorThrown) {
+                        $('.aside').text("暂时无法播放，请稍后再试。。。");
+                    }
+                });
+            } else {
+                callback();
+            }
+        }
+	    
+        // 投屏页播放音视频的方法
+        var screenCallback = function() {
+            var urlArray = new Array();
+            urlArray.push(audioUrl);
+            var content = {"openInCurrent":0,"opt":1,"urls":urlArray,"type":4}
+            var data = {"cmd":"resourceToScreen","content":content};
+            var body={'body':JSON.stringify(data)};
+            parent.parent.postMessage(JSON.stringify({'cmd':'resourceToScreen','body':body}),'*');
+        }
+	    
+        // 分享服务播放音频方法
+        var myaudio;
+        var shareCallback = function() {
+        	if($('.voiceImg').find('audio').length == 0) {
+                $('.voiceImg').append('<audio src="'+audioUrl+'" preload></audio></div>');
+            }
+            // 初始化时不用显示 mask
+            // 点击其他音频后在点击当前音频，加上mask
+            var showPlaymask = true;
+            if(!myaudio) {
+                myaudio = new Audio({
+                    ele: $('.attach-box')[0],
+                    autoplay: false,
+                    loop: false,
+                    ended: function () {
+                        $('.attach-box').removeClass('loading').removeClass('play').removeClass('pause');
+                        $('.playmask').hide();
+                    }
+                });
+                showPlaymask = false;
+            }
+            //当前音频播放或停止
+            if (myaudio.isPlaying) {
+                myaudio.audioPause();
+                $('.attach-box').removeClass('loading').removeClass('play').addClass('pause');
+            } else {
+                myaudio.audioPlay();
+                if(showPlaymask) {
+                    $('.playmask').show();
+                }
+                // 点击录音播放时要停止其他录音
+                // 实现方案，先发消息给父页面，父页面再去通知其他子页面
+                parent.postMessage({'cid': att_voice.objectId2, 'msgType':'pauseVideo'}, '*');
+            }
+        }
+	    
+        var top_domain = RichtextAttachmentUtils.getTopDomain();
+        var top_parent = RichtextAttachmentUtils.getTopParent();
+	    
+        function openClickEvent(){
+        	if('${source}' == 'screenDetail') {
+        		// 投屏页
+        		playAudio(screenCallback);
+        	} else if(top_domain.indexOf("note") > -1 || top_domain.indexOf("group") > -1 || top_domain.indexOf("notice") > -1) {
+        		// 笔记、话题、通知的编辑页或者详情页
+                if(att_voice.titleEdited == 1){
+                    att_voice.name = att_voice.fileTitle || "";
+                }else{
+                    att_voice.name = "录音-" + timeformat(att_voice.voiceLength || 0);
+                }
+                att_voice.fileId = att_voice.objectId2;
+                top_parent.postMessage({'msgType':'playMedia','mediaType': 'audio', 'media': att_voice}, '*');
+        	} else if (top_domain.indexOf("sharewh.chaoxing.com") < 0 && RichtextAttachmentUtils.isXXT) {
+                // 非分享页，且是在学习通里面打开的，通过客户端协议去播放
+                RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+            }  else {
+        		// 其他页面采用audio标签播放音频
+                playAudio(shareCallback);
+        	}
+        };
+        
+        window.addEventListener('message', function (e) {
+            var data = e.data;
+            if (!data) {
+                return;
+            }
+            if(data.msgType == 'dataChanged' && data.cid == json.att_video.cid) {
+            	// 附件数据变化
+            	jsonOld = data.name;
+                try{
+                    json = JSON.parse(jsonOld);
+                } catch(e) {
+                    console.log(e);
+                }
+                if(json) {
+                	att_voice = json.att_voice;
+                }
+            } else if(data.onlyAnimation) {
+            	// 笔记详情页和投屏页是通过插件播放的，只需要处理动画效果
+                if(data.action == 'play' && data.cid == att_voice.objectId2) {
+                	// 播放音频时，给播放的那个音频加上播放动画
+                	$('.attach-box .voiceImg').addClass("animate");
+                } else {
+                	$('.attach-box .voiceImg').removeClass("animate");
+                }
+                
+            } else if(data.type == 'play_time_jump' && json.cid == data.cid && data.seconds && data.seconds > 0) {
+            	// 收到录音打点的时间跳转，且当前音频正在播放则进行跳转
+            	if($(".attach-box .voiceImg").find('audio').length > 0 && !$(".attach-box .voiceImg audio")[0].paused) {
+            		$(".attach-box .voiceImg audio")[0].currentTime = data.seconds;
+            	}            	
+            } else if(data.cid != att_voice.objectId2 && $(".attach-box .voiceImg").find('audio').length > 0 && !$(".attach-box .voiceImg audio")[0].paused){
+            	// 当前音频不是点击播放那个，并且正在播放，则停止播放
+                $(".attach-box .voiceImg audio")[0].pause();
+                $('.attach-box .voiceImg').removeClass("animate");
+            }
+        })
+    </script>
+</body>
+</html>

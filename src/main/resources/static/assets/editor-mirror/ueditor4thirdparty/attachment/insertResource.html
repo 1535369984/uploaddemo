@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var att_resource = json.att_resource.content || "";
+        if (att_resource != "") {
+            var resourceName = att_resource.folderName || "";
+            var resourceLogo = "";
+            var resourceType = att_resource.shareType || "";
+            if(resourceType == 2){
+                resourceLogo = "images/ic_folder_private.png" || "";
+            }else if(resourceType == 0 || resourceType == 3){
+                resourceLogo = "images/ic_folder_share.png" || "";
+            }
+            var html = '<div class="attach_item insertresource">'+
+                            '<div class="folderImg"><img src="'+resourceLogo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2>'+ resourceName +'</h2>'+
+                            '</div>'+
+                        '</div>';
+                        
+	        $(".attach-box").append(html);
+	        $('.attach_infor h2').css('white-space','normal')
+            $('.attach_infor h2').each(function(index, element) {
+                $clamp(element, { clamp: 2, useNativeClamp: false });
+            });
+        }
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

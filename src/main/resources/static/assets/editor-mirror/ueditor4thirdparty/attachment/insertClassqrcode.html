@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            json = "";
+        }
+        if(json){
+        	var att_course = json.att_class_qrcode_info || "";
+        	if (att_course != "") {
+                var courseLogo = att_course.courseLogo || "images/icon_gray.png";
+                courseLogo = courseLogo.replace(/.webp/g, '.jpg');
+                if (courseLogo.indexOf("chaoxing.com") != -1) {
+                    courseLogo = courseLogo.replace(/origin/g, '100_100cQ50');
+                }
+                var courseName = att_course.courseName || "";
+                var courseTeacher = att_course.courseTeacher || "";
+                var html = '<div class="attach_item insertCourseclone">'+
+                                '<div class="circleImg"><img src="'+courseLogo+'"></div>'+
+                                '<div class="attach_infor">'+
+                                    '<div class="tag_b"><h2>'+courseName+'</h2><span class="tag"><em>课程</em></span></div>'+
+                                    '<p class="from">'+courseTeacher+'</p>'
+                                '</div>'+
+                            '</div>';
+                $(".attach-box").append(html);
+            }
+        }
+        function openClickEvent(){
+            RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

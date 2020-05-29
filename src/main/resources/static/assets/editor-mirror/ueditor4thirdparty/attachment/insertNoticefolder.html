@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <div class="attach-box" id="attach-box">
+        <div class="attach_item insertErrorannex">暂不支持显示该类型附件，请打开学习通查看</div>
+    </div>
+    <!-- <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+            //alert("获取信息失败");
+        }
+        var att_noticefile = json.att_noticefile || "";
+        if (att_noticefile != "") {
+            var name = att_noticefile.name || "";
+            var logo = "images/ic_folder_private.png";
+            var html = '<div class="attach_item insertNoticefolder">'+
+                            '<div class="folderImg"><img src="'+logo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2>'+name+'</h2>'+
+                            '</div>'+
+                        '</div>';
+            $(".attach-box").append(html);
+        }
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script> -->
+</body>
+</html>

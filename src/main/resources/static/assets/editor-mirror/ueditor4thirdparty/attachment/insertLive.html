@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box" style="cursor: pointer;"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+	    var statusMap = {//状态映射,直播状态4个，直播结束后如果可以回看则派生出第5个状态--直播回看
+	        0:{"cls":"insertLive-no","img":"images/icon_live_no.png","text":"直播未开始"},
+	        1:{"cls":"insertLive-ing","img":"images/icon_live_ing.png","text":"正在直播"},
+	        3:{"cls":"insertLive-no","img":"images/icon_live_no.png","text":"直播中断"},
+	        4:{"cls":"insertLive-ing","img":"images/icon_live_ing.png","text":"直播回看"},
+	        5:{"cls":"insertLive-no","img":"images/icon_live_no.png","text":"直播结束"}
+	    }
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var liveInfo = {};
+        var att_chat_course = json.att_chat_course || "";
+        if (att_chat_course != "") {
+            var vdoid = att_chat_course.description.vdoid;
+            var streamName = att_chat_course.description.streamName;
+            var liveTit = att_chat_course.title || '直播';
+            var liveTime = att_chat_course.subTitle || '';
+            var html = '<div class="attach_live insertLive-no">' +
+                    '<div class="attach_item insertLive">' +
+                     '<div class="img"><img src="images/icon_live_no.png"></div>' +
+                     '<div class="attach_infor">' +
+                             '<h2>' + liveTit + '</h2>' +
+                             '<p class="aside">' + liveTime + '</p>'+
+                     '</div>' +
+                    '</div>' +
+                    '<div class="live-status clearfix">' +
+                         '<span class="name fr">主播：' + (att_chat_course.description.userName || '') + '</span>' +
+                         '<span class="live-text"></span>' +
+                    '</div>' +
+            '</div>';
+            $(".attach-box").append(html);
+            
+            // 异步获取直播状态
+            $.ajax({
+                url:"/screen/note_note/status",
+                data:{"vdoid": vdoid, "streamName":streamName},
+                dataType:"json",
+                success:function(backData){
+                    //livestatus值 0 未开始 1 进行中 3 中断 4直播结束(ifreview=0可回看，如果ifreview=1表示不可回看)
+                    if(backData.status && backData.status==true){
+                        var liveStatus = backData.livestatus=="4"?(parseInt(backData.livestatus)+parseInt(backData.ifreview)):backData.livestatus;
+                        var statusInfo = statusMap[liveStatus];
+                        liveInfo.liveStatus = backData.livestatus;
+                        liveInfo.ifreview = backData.ifreview;
+                        if(statusInfo){
+                            $(".attach_live").removeClass("insertLive-ing").removeClass("insertLive-no").addClass(statusInfo["cls"]);
+                            $(".attach_item img").attr("src",statusInfo["img"]);
+                            $(".live-status .live-text").html(statusInfo["text"]);
+                        }
+                    }else{
+                    }
+                },
+                error:function(xhr){
+                }
+            });
+            
+            var top_parent = RichtextAttachmentUtils.getTopParent();
+            var top_domain = RichtextAttachmentUtils.getTopDomain();
+            
+            if(json.cid){
+                var cid=json.cid;
+                $('.attach_infor h2').css('white-space','normal')
+                $('.attach_infor h2').each(function(index, element) {
+                    $clamp(element, { clamp: 2, useNativeClamp: false });
+                });
+                if(top_parent) {
+                    // 修改附件高度
+                	top_parent.postMessage({'msgType':'heightChanged','cid': cid, 'height':$('.attach-box').height()}, '*');
+                }
+            }
+        }
+     
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        	/* if(top_domain && top_domain.indexOf("sharewh.chaoxing.com") > -1) {
+        	    RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        	} else {
+        		if(liveInfo.liveStatus=="0"){
+                    alert("直播未开始，请等待...！");
+                    return false;
+                }else if(liveInfo.liveStatus=="1"){
+                    // 正在播放中
+                }else if(liveInfo.liveStatus=="3"){
+                    alert("直播中断，请等待...！");
+                    return false;
+                }else if(liveInfo.liveStatus=="4" && liveInfo.ifreview==1){
+                    alert("此直播不支持回看！");
+                    return false;
+                }
+        		RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        	} */
+        };
+    </script>
+</body>
+</html>

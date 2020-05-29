@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>云盘</title>
+    <script type="text/javascript" src="/res/plugin/ueditor/ueditor.all.js"></script>
+    <script type="text/javascript">
+    parent.postMessage({'msgType': 'getUEditor', 'className':"edui-dialog edui-for-cloud edui-default"}, '*');
+    currentDialog = 'cloud';
+    </script>
+    <script type="text/javascript" src="../internal.js"></script>
+    <!-- jquery -->
+    <script type="text/javascript" src="../../third-party/jquery-1.10.2.min.js"></script>
+    
+    <script type="text/javascript" src="/res/pc/js/map.js"></script>
+    <script type="text/javascript" src="js/date.util.js"></script>
+    <!-- attachment dialog -->
+    <link rel="stylesheet" href="notes.css" type="text/css" />
+    <link rel="stylesheet" href="/res/plugin/ueditor/themes/default/dialogbase.css" type="text/css" />
+    <link rel="stylesheet" href="js/jquery.mCustomScrollbar.min.css" />
+    <script type="text/javascript" src="js/jquery.mCustomScrollbar.concat.min.js" ></script>
+    <script type="text/javascript" src="js/jquery.nicescroll.min.js"></script>
+</head>
+<body style="overflow-y: hidden">
+    <div class="wrapper">
+    	<!-- <div class="backToLast">返回上一级</div> -->
+        <div id="tabbody" class="tabbody">
+            <!--路径-->
+            <div class="popCell_title">
+                <!--20191213 -->
+                <ul class="breadcrumb fl" id="yunPanTitleId"> 
+                    <li class="active" resid="">全部文件</li> 
+                </ul>
+                <span class="colorShallow fr yunpanTotalTip">已选 <em>0</em> 个，共 <span></span> 个</span> 
+            </div>
+            <!-- 路径 end-->
+            <div class="popTableHead">
+                <ul class="popTable_th">
+                    <li class="popYunpan_th_check selectAll"><input type="checkbox" name="yunpan" value=""></li>
+                    <li class="popYunpan_th_name"><span>文件名</span></li>
+                    <li class="popYunpan_th_size"><span>大小</span></li>
+                    <li class="popUpload_th_time"><span>创建时间</span><!-- <span class="sort_down"></span><span class="sort_up"></span> --></li>
+                </ul>
+            </div>
+            <ul class="list" id="attachment">
+            	<!--文件夹-->
+            	<!-- <li class="folderItem">
+            		<div class="checkbox"><span class="check"></span></div>
+            		<div class="folder">
+            			<img class="folderIcon" src="images/folder.png" />
+	            		<div class="folderInfo">
+	            			<h3>每日心得</h3>
+	            		</div>
+	            		<img class="arrow" src="images/arrow.png" />
+            		</div>
+            	</li> -->
+            	<!--文件-->
+            	<!-- <li class="cloudItem">
+            		<div class="checkbox"><span class="check"></span></div>
+            		<div class="Mtion-con">
+						<div class="Ht-nation">
+							<span class="Ht-img"><img src="http://p.ananas.chaoxing.com/star3/90_90c/68050166ce4c821b1835f475a1533789.jpg?rw=400&rh=251&_fileSize=7438&_orientation=1"></span>
+							<div class="Ht-ct">
+								<h3 class="Ht-tit">20180613.mp4</h3>
+								<p class="Ht-p">579KB</p>
+							</div>
+						</div>
+					</div>
+            	</li> -->
+            	<!-- <li class="cloudItem">
+            		<div class="checkbox"><span class="check"></span></div>
+            		<div class="Mtion-con">
+						<div class="Ht-nation">
+							<span class="Ht-img"><img src="http://p.ananas.chaoxing.com/star3/90_90c/68050166ce4c821b1835f475a1533789.jpg?rw=400&rh=251&_fileSize=7438&_orientation=1"></span>
+							<div class="Ht-ct">
+								<h3 class="Ht-tit">很多很多字很多很多字很多很多字很多很多字很多很多字很多很多字很多很多字很多很多字</h3>
+								<p class="Ht-p">很多很多字很多很多字很多很多字很多很多字很多很多字很多很多字很多很多字很多很多字</p>
+							</div>
+						</div>
+					</div>
+            	</li> -->
+            </ul>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/dialog.attachment.util.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js" ></script> 
+    <script type="text/javascript" src="js/jquery.nicescroll.js" ></script>
+    <script type="text/javascript" src="js/cloud.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+</body>
+</html>

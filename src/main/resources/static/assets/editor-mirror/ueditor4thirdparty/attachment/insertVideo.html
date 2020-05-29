@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<script type="text/javascript">
+insertVideo = {
+    hasChangedEvent:function(){}
+}
+</script>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body onhashchange="insertVideo.hasChangedEvent()">
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+	    var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+	    try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        // 是否是投屏页
+        var isScreen = '${source}' == 'screenDetail';
+        var att_video = json.att_video || "";
+	    insertVideo.hasChangedEvent = function() {
+	    	var top_parent = RichtextAttachmentUtils.getTopParent();
+	    	if(json) {
+	            cid = json.att_video.cid;
+		    	top_parent.postMessage({'msgType': 'dataChanged', 'cid':json.att_video.cid}, '*');
+	            /* try{
+	                   // 根据cid重新获取父级的name值
+	                   if(parent && parent.window && parent.window.document) {
+		                   jsonOld = $(parent.window.document).find('iframe[cid="'+ cid +'"]')[0].name;
+		                   json = JSON.parse(jsonOld);
+		                   if(json) {
+		                       att_video = json.att_video;
+		                       //var errorImg = "javascript:this.src='/res/pc/images/richtext/icon_gray.png';";
+		                       var videoLogo = att_video.coverUrl || "/res/pc/images/richtext/icon_gray.png";
+		                       $(".attach-box").find('img').eq(0).attr('src', videoLogo);
+		                   }
+	                   }
+	               }catch(e){
+	                   console.log(e);
+	                   json = "";
+	               } */
+	    	}
+        }
+	    if(json == ""){
+	    	//alert("获取信息失败");
+	    }
+	    if (att_video != "") {
+	        var videoLogo = att_video.coverUrl || "";
+	        /* if(isScreen) {
+                // 投屏页
+                videoLogo = videoLogo || "/res/pc/images/richtext/icon_gray.png";
+	        	videoLogo = videoLogo.replace(/.webp/g, '.jpg');
+	            if (videoLogo && videoLogo.indexOf("chaoxing.com") != -1 && videoLogo.indexOf("p.ananas.chaoxing.com") > -1) {
+	                videoLogo = videoLogo.replace(/origin/g, '100_100cQ50');
+	            }
+	        } */
+	        var videoName = att_video.fileTitle || "";
+	        var videoSize = att_video.fileLength || "";
+	        if(videoSize != ""){
+	            videoSize = fileSize(videoSize);
+	        }
+	        var videoLength = att_video.videoLength || '';
+	        var errorImg = "javascript:this.src='images/mp4.png'"
+	        /* if (isScreen) {
+	        	var html = '<div class="attach_item insertVideo">'+
+				                '<div class="img squareRadius"><img src="'+videoLogo+'" onerror="'+ errorImg +'"></div>'+
+				                '<div class="attach_infor">'+
+				                    '<h2>'+videoName+'</h2>'+
+				                    '<p class="aside">'+videoSize+'</p>'+
+				                '</div>'+
+				                '<div class="circleChart"></div>'
+				            '</div>';
+	        } else { */
+	        	var html = '<div class="attach_item insertVideo">'+
+				                '<div class="video-cover" style="background-image: url('+videoLogo+');" data-src="'+videoLogo+'">'+
+				                '<div class="video-chat-play"></div>'+
+				                '<div class="video-chat"><span class="video-chat-size">'+videoSize+'</span><span class="video-chat-duration">'+ formartTime(videoLength) +'</span></div>'+
+				            '</div>';
+	        //}
+	    }
+	    $(".attach-box").append(html);
+	    if (att_video.videoLength) {
+	    	$(".video-chat").show();
+	    	$('.video-chat-play').show();
+	    }
+	    $('.circleChart').hide();
+	    function fileSize(bytes) {
+	        if (bytes / 1024 > 1) {
+	            if (bytes / (1024 * 1024) > 1) {
+	                return "" + (bytes/(1024 * 1024)).toFixed(1) + "MB";
+	            } else {
+	                return "" + parseInt(bytes/1024) + "KB";
+	            }
+	        } else {
+	            return "" + bytes + "B";
+	        }
+	    }
+	    function formartTime(seconds) {
+	    	if (!seconds) {
+	    		return '';
+	    	}
+            var formatNumber = function (n) {
+                n = n.toString()
+                return n[1] ? n : '0' + n
+            }
+            var m = Math.floor(seconds / 60);
+            var s = Math.floor(seconds % 60);
+            return formatNumber(m) + ":" + formatNumber(s);
+        }
+	    
+	    var videoUrl = '';
+	    // 投屏页播放视频
+	    function screenPlayVideo() {
+            var urlArray = new Array();
+            urlArray.push(videoUrl);
+            var content = {"openInCurrent":0,"opt":1,"urls":urlArray,"type":3}
+            var data = {"cmd":"resourceToScreen","content":content};
+            var body={'body':JSON.stringify(data)};
+            parent.parent.postMessage(JSON.stringify({'cmd':'resourceToScreen','body':body}),'*');
+        }
+	    // 获取视频信息
+	    function getVideoInfo() {
+	    	if(videoUrl) {
+	    		screenPlayVideo();
+	    	} else {
+	    		$.ajax({
+	                   url : "/screen/note_note/files/status/" + att_video.objectId2, // 投屏下的获取资源信息的方法不需要登录
+	                   type : "get",
+	                   data : {isMedia:true},
+	                   dataType : "json",
+	                   success : function(backData) {
+	                       if(backData&&backData["status"]&&backData["status"]==true&&(backData["url"]||"")!=""){
+	                           videoUrl = backData["url"];
+	                           screenPlayVideo();
+	                       }else{
+	                           if(backData && backData["msg"] && (backData["msg"]||"") != ""){
+	                               $('.aside').text(backData["msg"]);
+	                           }else{
+	                               $('.aside').text("暂时无法播放，请稍后再试。。。");
+	                           }
+	                       }
+	                   },
+	                   error : function(xhr ,textStatus ,errorThrown) {
+	                       $('.aside').text("暂时无法播放，请稍后再试。。。");
+	                   }
+	           });
+	    	}
+	    }
+	    
+	    var top_domain = RichtextAttachmentUtils.getTopDomain();
+        var top_parent = RichtextAttachmentUtils.getTopParent();
+        
+        function openClickEvent(){
+    		// 不是分享页，且不是在学习通里面打开的， 调用父页面的方法播放
+           	att_video.name = att_video.fileTitle;
+            att_video.fileId = att_video.objectId2;
+            top_parent.postMessage({'msgType':'playMedia','mediaType': 'video', 'media': att_video}, '*');
+        };
+        
+        // 监听父页面发过来的数据
+        window.addEventListener('message', function (e) {
+            var data = e.data;
+            if (!data) {
+                return;
+            }
+            if(data.msgType == 'dataChanged' && data.cid == json.att_video.cid) {
+            	// 附件数据变化
+            	jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(data.name);
+            	try{
+            		json = JSON.parse(jsonOld);
+            	} catch(e) {
+            		console.log(e);
+            	}
+                if(json) {
+                    att_video = json.att_video;
+                    var videoLogo = att_video.coverUrl || "images/icon_gray.png";
+                    if('${source}' == 'screenDetail') {
+                        // 投屏页
+                        $(".attach-box").find('img').eq(0).attr('src', videoLogo);
+                    } else {
+	                    $(".video-cover").attr("data-src",videoLogo);
+	                    $(".video-chat-duration").html(formartTime(att_video.videoLength));
+	                    $(".video-cover").css("background-image",'url('+videoLogo+')');
+	                    $(".video-chat").show();
+	                    $('.video-chat-play').show();
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+</html>

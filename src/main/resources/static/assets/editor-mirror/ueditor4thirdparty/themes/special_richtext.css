@@ -1,0 +1,200 @@
+/* 富文本投屏页用到的，且可以和其他项目共用的样式*/
+/*录音打点*/
+.record-box {
+	margin-top: 0.34rem;
+	padding-left: 0.16rem;
+}
+
+.record-list {
+	padding-left: 0.24rem;
+	position: relative;
+	padding-bottom: 0.34rem;
+}
+
+.record-list:after {
+	content: '';
+	position: absolute;
+	left: -1px;
+	top: 0;
+	width: 3px;
+	height: 100%;
+	-webkit-transform: scaleX(.5);
+	transform: scaleX(.5);
+	-webkit-transform-origin: 0 0;
+	transform-origin: 0 0;
+	background-color: #b2e0ff;
+	z-index: -1;
+}
+
+.record-list:last-child {
+	padding-bottom: 0.06rem;
+}
+
+.record-list-tit {
+	position: relative;
+	line-height: 0.58rem;
+	top: -0.22rem;
+	margin-bottom: -0.12rem;
+	margin-left: -0.24rem;
+	padding-left: 0.24rem;
+}
+
+.record-list-tit:before {
+	content: "";
+	width: 0.2rem;
+	height: 0.2rem;
+	background: #66c2ff;
+	border-radius: 50%;
+	position: absolute;
+	top: 0.16rem;
+	left: -0.1rem;
+	z-index: 2;
+}
+
+.record-list-tit>* {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.record-list-time {
+	font-size: 0.34rem;
+	color: #0099ff;
+	font-weight: bold;
+	height: 0.58rem;
+	background: #ebf7ff;
+	position: relative;
+	margin-left: -0.54rem;
+	margin-right: 0.04rem;
+	line-height: 0.58rem;
+	right: 0;
+	padding-left: 0.54rem;
+	padding-right: 0.3rem;
+	border-radius: 0.3rem;
+	min-width: 1.7rem;
+	-webkit-user-select: none;
+}
+
+.record-list-ppt {
+	width: 34px;
+	height: 0.34rem;
+	line-height: 0.34rem;
+	background: #b3b3b3;
+	margin: 3px 0 0 6px;
+	border-radius: 0.28rem;
+	text-align: center;
+	font-size: 0.22rem;
+	color: #FFF;
+}
+
+.record-iframe .editor-iframe:first-child:after {
+	content: '';
+	position: absolute;
+	left: -1px;
+	top: 0;
+	width: 0.28rem;
+	height: 100%;
+	-webkit-transform: scaleX(.5);
+	transform: scaleX(.5);
+	-webkit-transform-origin: 0 0;
+	transform-origin: 0 0;
+	background-color: #0099ff;
+	z-index: 9;
+}
+
+.record-iframe .editor-iframe:first-child {
+	margin-left: -0.24rem;
+}
+
+.record-iframe .editor-iframe {
+	position: relative;
+	margin-top: 0.1rem;
+}
+
+.record-list-tit:before {
+	content: "";
+	background: url(https://noteyd.chaoxing.com/res/pc/images/richtext/icon_arrow.png) no-repeat;
+	background-size: contain;
+	border-radius: 0;
+}
+
+.record-tit-cur:before {
+	content: "";
+	background: rgba(255, 255, 255, .7);
+	border-radius: 50%;
+}
+
+.record-tit-cur .record-list-time {
+	background: #0099ff;
+	color: #FFF;
+}
+/*录音打点 end */
+
+a, a:active, a:hover, a:link, a:visited {
+    color: #333;
+}
+
+a.dynacALink, a.dynacALink:active, a.dynacALink:hover, a.dynacALink:link,
+    a.dynacALink:visited {
+    color: #0099ff;
+}
+
+ol {
+	list-style-type: decimal;
+}
+ul {
+	list-style-type:disc;
+	padding-left: 0.4rem;
+    width: unset !important;
+}
+/*附件*/
+iframe.attach-module {
+    display: block;
+    width: 100% !important;
+    height: 2.3rem !important;
+    margin: 0.15rem 0;
+    border-radius: 0.08rem;
+}
+
+ol .attach-module, ul .attach-module {
+    margin-left: -20px;
+}
+
+iframe.attach-insertLive {
+    height: 2.65rem!important;
+}
+iframe.attach-insertErrorannex {
+    height: 1rem;
+}
+
+iframe.attach-insertGroup {
+    height: 2.17rem;
+}
+/*原位播放视频*/
+iframe.attach-insertVideo {
+    height: 5.34rem !important;
+}
+
+img {
+    display: block;
+    margin: 0.15rem auto;
+    max-width: 100%;
+}
+
+/*表格*/
+.table {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    margin-bottom: 0.2rem;
+    border-collapse: collapse;
+    display: table;
+}
+
+table th, table td {
+    min-width:1.4rem;
+    border: solid 1px #ebebeb;
+    padding: 5px 10px;
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            json = "";
+        }
+        if(json){
+        	var att_book = json.att_book || "";
+            if (att_book != "") {
+            	var bookUrl = att_book.bookUrl || "";
+                var bookCoverUrl = att_book.bookCoverUrl || "images/icon_gray.png";
+                var bookChapter = att_book.bookChapter || "";
+                var bookTitle = att_book.bookTitle || "";
+                var bookExtract  = att_book.bookExtract || "";
+                var bookAuthor = att_book.bookAuthor || ""; 
+                var html = '<div class="insertBook">'+
+                                '<div class="insertBook_art">'+
+                                    '<div class="insertBook_tit words2">摘自《'+bookTitle+'》#'+bookChapter+'#</div>'+
+                                    '<div class="insertBook_infor words3">'+bookExtract+'</div>'+
+                                '</div>';
+                if(bookUrl != ""){
+                        html += '<div class="attach_item">'+
+                                    '<div class="img squareRadius"><img src="'+bookCoverUrl+'"></div>'+
+                                    '<div class="attach_infor">'+
+                                        '<h2 class="words2">'+bookTitle+'</h2>'+
+                                        '<p class="from">'+bookAuthor+'</p>'+
+                                    '</div>'+
+                                '</div>';
+                }
+                    html+= '</div>';
+                $(".attach-box").append(html);
+            }
+        }
+        function openClickEvent(){
+            RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

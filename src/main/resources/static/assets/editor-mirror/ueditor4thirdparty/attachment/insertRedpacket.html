@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <div class="attach-box" id="attach-box">
+        <div class="attach_item insertErrorannex">暂不支持显示该类型附件，请打开学习通查看</div>
+    </div>
+    <!-- <script type="text/javascript">
+        var jsonOld = window.name;
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var att_Redpacket = json.att_red_packet || "";
+        if (att_Redpacket != "") {
+            var RedpacketTitle = att_Redpacket.title || "";
+            var RedpacketLogo = "/res/pc/images/richtext/icon_red_packet.png" || "";
+         
+            var html = '<div class="attach_item insertRedpacket">'+
+                            '<div class="img"><img src="'+RedpacketLogo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2>红包</h2>'+
+                                '<p class="aside words2">'+RedpacketTitle+'</p>'+
+                            '</div>'+
+                        '</div>';
+            $(".attach-box").append(html);
+            
+            $('.attach_infor .aside').css('white-space','normal')
+            $('.attach_infor .aside').each(function(index, element) {
+                $clamp(element, { clamp: 2, useNativeClamp: false });
+            });
+            if(json.cid){
+                var cid = json.cid;
+                var url;
+                if(document) {
+                    url = document.referrer;
+                }
+                if(url && url.indexOf("sharewh.chaoxing.com") > -1){
+                    // 和分享页的通信设计到iframe跨域问题，通过 postMessage 方法处理
+                    var parentWindow = window.parent;
+                    parentWindow.postMessage({ 'cid': cid, 'height':$('.attach-box').height()}, 'https://sharewh.chaoxing.com');
+                } else {
+                    if(url && (url.indexOf("screen/note_note/noteDetail") > -1 || url.indexOf("pc/note_note/noteDetailLatest") > -1)) {
+                        // 投屏页和详情页设置了 document.domain = 'chaoxing.com'，因此在iframe里面也要设置下
+                        document.domain = 'chaoxing.com';
+                    }
+                    if(parent && parent.window && parent.window.document) {
+                        $(parent.window.document).find('iframe[cid='+cid+']').css('height',$('.attach-box').height());
+                    }
+                }
+            }
+        }
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script> -->
+</body>
+</html>

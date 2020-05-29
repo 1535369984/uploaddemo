@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var url;
+        if(parent !== window) { 
+            try {
+               url = top.location.href || ''; 
+            }catch (e) { 
+               url = document.referrer || ''; 
+            } 
+        }
+        var att_web = json.att_web || "";
+        var screenOpenUrl = '';
+        if (att_web != "") {
+            var img = att_web.logo || "images/icon_att_web.png";
+            img = img.replace(/.webp/g, '.jpg');
+            if (img.indexOf("chaoxing.com") != -1) {
+                img = img.replace(/origin/g, '100_100cQ50');
+            }
+            var att_web_title = att_web.title || "";
+            var att_web_content = "";
+            //showContent=1时显示
+            if(att_web.showContent && att_web.content){
+                att_web_content = att_web.content;
+            }
+            var html = '<div class="attach_item insertWeb clearfix">'+
+                            '<div class="img squareRadius"><img src="'+img+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2 class="words2"></h2>'+
+                                '<p class="aside"></p>'+
+                            '</div>'+
+                        '</div>';
+            $(".attach-box").append(html);
+            $('.words2').text(att_web_title || "");
+            $('.aside').text(att_web_content || "");
+            $('p.aside').css('margin-bottom','0');
+            if(json.cid){
+                var cid=json.cid;
+                $('.attach_infor h2').css('white-space','normal')
+                $('.attach_infor h2').each(function(index, element) {
+                    $clamp(element, { clamp: 2, useNativeClamp: false });
+                });
+                var top_parent = RichtextAttachmentUtils.getTopParent();
+                if(top_parent) {
+                    // 修改附件高度
+                    top_parent.postMessage({ 'cid': cid, 'height':$('.attach-box').height()}, '*');
+                }
+            }
+            
+            screenOpenUrl = att_web.url;
+            
+            if(att_web && att_web.sourceConfig && att_web.sourceConfig.cataid==100000001 && att_web.url && url.indexOf('screen')>-1) {
+                // 专题
+                var url = att_web.url;
+                var chapterId = url.substring(url.lastIndexOf('/')+1,url.indexOf('?'));
+                var courseIdStr = url.substring(url.indexOf('?'),url.indexOf('&'));
+                screenOpenUrl = 'http://special.chaoxing.com/special/screen/tocard/' + chapterId + courseIdStr + '&_from_=#fromChaoxingStudyToScreen';
+            }
+        }
+        function openClickEvent(){
+        	if('${source}' == 'screenDetail' && screenOpenUrl) {
+        		var urlArray = new Array();
+                urlArray.push(screenOpenUrl);
+                var content = {"openInCurrent":0,"opt":1,"urls":urlArray,"type":2}
+                var data = {"cmd":"resourceToScreen","content":content};
+                var body={'body':JSON.stringify(data)};
+                parent.parent.postMessage(JSON.stringify({'cmd':'resourceToScreen','body':body}),'*');
+        	} else {
+        	    RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        	}
+        };
+    </script>
+</body>
+</html>

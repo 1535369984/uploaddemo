@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<script type="text/javascript">
+insertCloud = {
+	hasChangedEvent:function(){}
+}
+</script>
+<body onhashchange="insertCloud.hasChangedEvent()">
+    <style>
+        /*左侧遮罩*/
+        .playmask{display: none; position: absolute;top: 50%;left: 0;margin-top: -50%;width:58px;height: 58px;z-index: 10; background: rgba(0,0,0,0.5); border-radius: 3px;}
+        .playmask audio{display: none;}
+        .playmask .playicon{position: absolute;top: 0;left: 0;width: 100%;height: 100%;}
+        @keyframes rotate{  from{transform: rotate(0);} to{transform: rotate(360deg);} }
+        .audio-content{display: none; height: 18px;}
+        /*进度条*/
+        .audio-progress { position: relative; float: left; width: calc(100% - 90px); height: 2px; margin: 7px 10px 0 0; background: #eee; }
+        .audio-progress .audio-progress-detail { height: 100%; width: 100%; background: #ebebeb; position: relative; cursor: pointer; }
+        .audio-progress .audio-progress-detail .audio-voice-p { width: 0%; position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow: hidden; background: #0099ff; z-index: 2; }
+        .audio-progress .audio-progress-detail .audio-buffer-p { width: 0%; position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow: hidden; background: #d9d9d9; z-index: 1; }
+        .audio-progress .audio-origin-bar { position: absolute; top: 0; left: 0; width: calc(100% - 12px); height: auto; }
+        .audio-progress .audio-origin { position: absolute; left: 0; top: 50%; z-index: 2; width: 12px; height: 12px; margin-top: -6px; margin-left: 0; border-radius: 50%; -moz-border-radius: 50%; -webkit-border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 0 3px 1px #ebebeb; }
+        .audio-progress .audio-origin.loading { animation: rotate 1s linear infinite; background-image: url(images/loadingmini.png); background-size: 10px 10px; background-position: center center;  background-repeat: no-repeat; }
+        /*正在加载*//*时间进度*/
+        .audio-loading-text,.audio-time {display: none; float: left; width: 80px; height: 18px; line-height: 18px; font-size: 11px; color: #999999;}
+        
+        /*加载中*/
+        .loading .playmask{display: none;}
+        .loading .audio-loading-text{display: block;}
+        .loading .audio-time{display: none;}
+        .loading .audio-content {display: block;}
+        .loading .audio-origin { animation: rotate 1s linear infinite; background-image: url(images/loadingmini.png); background-size: 10px 10px; background-position: center center; background-repeat: no-repeat; }
+        .loading .aside{display: none;}
+        /*播放状态*/
+        .play .playmask{display: block;}
+        .play .playmask .playicon{background: url(images/play.png) center center / 16px 16px no-repeat;}
+        .play .audio-loading-text{display: none;}
+        .play .audio-time{display: block;}
+        .play .audio-content {display: block;}
+        .play .audio-origin{background-image: none;}
+        .play .aside{display: none;}
+        /*暂停状态*/
+        .pause .playmask{display: block;}
+        .pause .playmask .playicon{background: url(images/pause.png) center center / 16px 16px no-repeat;}
+        .pause .audio-loading-text{display: none;}
+        .pause .audio-time{display: block;}
+        .pause .audio-content {display: block;}
+        .pause .audio-origin{background-image: none;}
+        .pause .aside{display: none;}
+        
+        @media only screen and (max-width: 690px){
+            .playmask {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        @media only screen and (min-width: 690px){
+            .playmask {
+                width: 58px;
+                height: 58px;
+            }
+        }
+            
+    </style>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <script type="text/javascript" src="js/audio.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            // 附件中的内容包含单引号时进行了转换，显示时替换回来
+            json = JSON.parse(jsonOld.replace(/&apos;/g,"'"));
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+            //alert("获取信息失败");
+        }
+        // 数据改变事件
+        insertCloud.hasChangedEvent = function() {
+            var top_parent = RichtextAttachmentUtils.getTopParent();
+            if(json) {
+                cid = json.att_clouddisk.cid;
+                top_parent.postMessage({'msgType': 'dataChanged', 'cid':json.att_clouddisk.cid}, '*');
+            }
+        }
+		//云盘文件显示两种 ：1.下载 保存到云盘 批量操作  2.预览 下载  保存到云盘  批量操作
+        var CloudDiskImg = [
+            {"type":"ppt","img":"images/ppt.png"},
+            {"type":"pptx","img":"images/ppt.png"},
+            {"type":"doc","img":"images/doc.png"},
+            {"type":"docx","img":"images/doc.png"},
+            {"type":"rar","img":"images/rar.png"},
+            {"type":"zip","img":"images/rar.png"},
+            {"type":"jpg","img":"images/jpg.png"},
+            {"type":"png","img":"images/jpg.png"},
+            {"type":"jpeg","img":"images/jpg.png"},
+            {"type":"psd","img":"images/jpg.png"},
+            {"type":"tiff","img":"images/jpg.png"},
+            {"type":"gif","img":"images/jpg.png"},
+            {"type":"bmp","img":"images/jpg.png"},
+            {"type":"mp4","img":"images/mp4.png"},
+            {"type":"3gp","img":"images/mp4.png"},
+            {"type":"avi","img":"images/mp4.png"},
+            {"type":"rmvb","img":"images/mp4.png"},
+            {"type":"asf","img":"images/mp4.png"},
+            {"type":"divx","img":"images/mp4.png"},
+            {"type":"mpg","img":"images/mp4.png"},
+            {"type":"mpeg","img":"images/mp4.png"},
+            {"type":"mpe","img":"images/mp4.png"},
+            {"type":"mkv","img":"images/mp4.png"},
+            {"type":"vob","img":"images/mp4.png"},
+            {"type":"flv","img":"images/mp4.png"},
+            {"type":"m4v","img":"images/mp4.png"},
+            {"type":"mov","img":"images/mp4.png"},
+            {"type":"f4v","img":"images/mp4.png"},
+            {"type":"wmv","img":"images/mp4.png"},
+            {"type":"mp3","img":"images/mp3.png"},
+            {"type":"wav","img":"images/mp3.png"},
+            {"type":"ogg","img":"images/mp3.png"},
+            {"type":"amr","img":"images/mp3.png"},
+            {"type":"mp3pro","img":"images/mp3.png"},
+            {"type":"ra","img":"images/mp3.png"},
+            {"type":"rma","img":"images/mp3.png"},
+            {"type":"real","img":"images/mp3.png"},
+            {"type":"midi","img":"images/mp3.png"},
+            {"type":"mid","img":"images/mp3.png"},
+            {"type":"mod","img":"images/mp3.png"},
+            {"type":"flac","img":"images/mp3.png"},
+            {"type":"ape","img":"images/mp3.png"},
+            {"type":"aac","img":"images/mp3.png"},
+            {"type":"aiff","img":"images/mp3.png"},
+            {"type":"m4a","img":"images/mp3.png"},
+            {"type":"wma","img":"images/mp3.png"},
+            {"type":"pdf","img":"images/pdf.png"},
+            {"type":"epub","img":"images/epub.png"},
+            {"type":"xlsx","img":"images/xlsx.png"},
+            {"type":"xls","img":"images/xlsx.png"},
+            {"type":"xlsm","img":"images/xlsx.png"},
+            {"type":"xltm","img":"images/xlsx.png"},
+            {"type":"xlsb","img":"images/xlsx.png"},
+            {"type":"txt","img":"images/txt.png"},
+            {"type":"pdz","img":"images/pdz.png"}
+        ];
+        var canOpenFile = {
+            file : [
+              {'value':'resid','keys':' .txt, '},
+              {'value':'objectId','keys':' .pdz, '},
+              {'value':'objectId','keys':' .pdf, '},
+              {'value':'objectId','keys':' .epub, '},
+              {'value':'objectId','keys':' .ppt, .pptx, '},
+              {'value':'objectId','keys':' .doc, .docx, '},
+              {'value':'objectId','keys':' .xls, .xlsx, .xlt, .xlsm, .xlsm, .xltm, .xlsb'},
+            ]
+        }
+        var att_clouddisk = json.att_clouddisk || "";
+        //文件id
+        var fileId = '';
+        var resid = '';//云盘resid 用于预览
+        var suffix = '';
+        var icon = '';
+        var isAudio = false;
+        var isVideo = false;
+        var mediaUrl = ""; // 音视频url
+        var myaudio; // 分享页播放音频的 audio 对象
+        var previewHtml = '';//云盘预览按钮
+        if (att_clouddisk) {
+        	fileId = att_clouddisk.fileId || "";
+        	resid = att_clouddisk.resid || "";
+            var fileName = att_clouddisk.name || "";
+            var fileSize = att_clouddisk.fileSize || "";
+            var suffixName = fileName.toLowerCase();
+            var i = suffixName.lastIndexOf("."); 
+            suffix = suffixName.substring(i+1);
+            for(var i=0;i<CloudDiskImg.length;i++){
+                if(suffix == CloudDiskImg[i].type){
+                    icon = CloudDiskImg[i].img;
+                    if(icon.indexOf('mp3') > -1) {
+                    	isAudio = true;
+                    } else if(icon.indexOf('mp4') > -1) {
+                    	isVideo = true;
+                    }
+                    if(icon.indexOf('ppt') > -1 || icon.indexOf('doc') > -1 || icon.indexOf('xls') > -1 || icon.indexOf('pdf') > -1){
+                    	previewHtml = '<span class="attachPreview">预览</span>';
+                    }
+                    continue;
+                }
+            }
+            var errorImg = "javascript:this.src='images/icon_cloud.png';"
+            if(isVideo && att_clouddisk.infoJsonStr) {
+                // 视频，获取云盘返回的封面
+                icon = att_clouddisk.infoJsonStr.thumbnail;
+                errorImg = "javascript:this.src='images/mp4.png'"
+            }
+            if(!icon){
+                icon = "images/icon_cloud.png"
+            }
+            var html = '<div class="attach_item insertCloud">'+
+                            '<div class="img"><img src="'+icon+'" onerror="'+ errorImg +'"><div class="playmask"><div class="playicon"></div></div></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2 id="name"></h2>'+
+                                '<p class="aside">'+fileSize+'</p><div class="audio-content"></div>'+
+                            '</div>'+
+                            '<div class="attachRight">'+ 
+								'<span class="attachBatch">批量操作</span><span class="attachSaveCloud">保存到云盘</span><span class="attachDown">下载</span>'+ previewHtml +
+							'</div>'
+                        '</div>';
+        }
+        $(".attach-box").append(html);
+       
+
+    	//是否是详情页，详情页时才支持云盘文件的预览、下载、保存到云盘、批量操作等
+    	var isDetailPage = false;
+		var referrer = document.referrer||"";
+		//判断是否小组详情页
+		if(referrer.indexOf("/pc/topic/")!=-1 && referrer.indexOf("jumpToTopicDetail")!=-1){
+			isDetailPage=true;
+		}
+		//判断是否笔记详情页
+		if(referrer.indexOf("/pc/note_note/")!=-1 && referrer.indexOf("noteDetailLatest")!=-1){
+			isDetailPage=true;
+		}
+		//判断是否通知详情页
+		if(referrer.indexOf("/pc/notice/")!=-1 && referrer.indexOf("detail")!=-1){
+			isDetailPage=true;
+		}
+        if(isDetailPage){
+        	$('.attach_infor').css('width','calc(100% - 330px)');
+        }else{
+        	$('.attachRight').hide();
+        }
+       
+        $('#name').text(fileName);
+        $('.attach_infor h2').css('white-space','normal');
+        $('.attach_infor h2').each(function(index, element) {
+            $clamp(element, { clamp: 2, useNativeClamp: false });
+        });
+        
+        var top_domain = RichtextAttachmentUtils.getTopDomain();
+        var isShareDomain = false;
+        if(top_domain.indexOf("sharewh.chaoxing.com") > -1) {
+            // 分享页直接通过 audio 标签播放
+            isShareDomain = true;
+        }
+        
+        // 播放音视频方法
+        function playMedia(callback) {
+        	if(!mediaUrl) {
+                $.ajax({
+                    url : "/screen/note_note/files/status/" + att_clouddisk.fileId, // 投屏下的获取资源信息的方法不需要登录
+                    type : "get",
+                    data : {isMedia:true},
+                    dataType : "json",
+                    success : function(backData) {
+                        if(backData&&backData["status"]&&backData["status"]==true&&(backData["url"]||"")!=""){
+                        	mediaUrl = backData["url"];
+                            callback();
+                        }else{
+                            if(backData && backData["msg"] && (backData["msg"]||"") != ""){
+                                $('.aside').text(backData["msg"]);
+                            }else{
+                                $('.aside').text("暂时无法播放，请稍后再试。。。");
+                            }
+                        }
+                    },
+                    error : function(xhr ,textStatus ,errorThrown) {
+                        $('.aside').text("暂时无法播放，请稍后再试。。。");
+                    }
+                });
+            } else {
+            	callback();
+            }
+        }
+        
+        // 投屏页播放音视频的方法
+        var screenCallback = function() {
+        	var type = '';
+            if(isAudio) {
+            	type = 4;
+            } else if(isVideo) {
+            	type = 3;
+            }
+        	var urlArray = new Array();
+        	urlArray.push(mediaUrl);
+            var content = {"openInCurrent":0,"opt":1,"urls":urlArray,"type":type}
+            var data = {"cmd":"resourceToScreen","content":content};
+            var body={'body':JSON.stringify(data)};
+            parent.parent.postMessage(JSON.stringify({'cmd':'resourceToScreen','body':body}),'*');
+        }
+        
+        // 分享服务播放音频方法
+        var shareCallback = function() {
+        	if($('.insertCloud .img').find('audio').length == 0) {
+                $('.insertCloud .img').append('<audio src="'+mediaUrl+'" preload></audio></div>');
+            }
+        	// 初始化时不用显示 mask
+            // 点击其他音频后在点击当前音频，加上mask
+            var showPlaymask = true;
+            if(!myaudio) {
+                myaudio = new Audio({
+                    ele: $('.attach-box')[0],
+                    autoplay: false,
+                    loop: false,
+                    ended: function () {
+                        $('.attach-box').removeClass('loading').removeClass('play').removeClass('pause');
+                        $('.playmask').hide();
+                    }
+                });
+                showPlaymask = false;
+            }
+            //当前音频播放或停止
+            if (myaudio.isPlaying) {
+                myaudio.audioPause();
+                $('.attach-box').removeClass('loading').removeClass('play').addClass('pause');
+            } else {
+                myaudio.audioPlay();
+                if(showPlaymask) {
+                    $('.playmask').show();
+                }
+                // 点击录音播放时要停止其他录音
+                // 实现方案，先发消息给父页面，父页面再去通知其他子页面
+                window.parent.postMessage({'cid': att_clouddisk.fileId, 'msgType':'pauseVideo'}, '*');
+            }
+        }
+        var screenDocumentOpenUrl = '';
+        // 如果是支持在线预览的文档，在通过网页投屏打开
+        function oepnScreenDocument() {
+        	if(suffix){
+                var keyId="";
+                var ls = canOpenFile.file;
+                for (var j = 0; j < ls.length; j++) {
+                  if (ls[j].keys.indexOf(suffix+",") >= 0) {
+                    keyId = ls[j].value;
+                    break;
+                  }
+                }
+                var objectId = att_clouddisk.fileId;
+                var resid = att_clouddisk.resid;
+                if(keyId=="objectId" && objectId){
+                    screenDocumentOpenUrl = "http://pan-yz.chaoxing.com/screen/file_"+objectId;
+                } else if(keyId=="resid" && resid){
+                    screenDocumentOpenUrl= "http://pan-yz.chaoxing.com/preview/showpreview_"+resid+".html";
+                }
+                if(screenDocumentOpenUrl) {
+                    var urlArray = new Array();
+                    urlArray.push(screenDocumentOpenUrl);
+                    var content = {"openInCurrent":0,"opt":1,"urls":urlArray,"type":2}
+                    var data = {"cmd":"resourceToScreen","content":content};
+                    var body={'body':JSON.stringify(data)};
+                    parent.parent.postMessage(JSON.stringify({'cmd':'resourceToScreen','body':body}),'*');
+                } else {
+                	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '', false);
+                }
+           }
+        }
+        
+        //统一的云盘预览
+        function getOfficePrev(fileUrl,resid, type) {
+//             var host = "officeonline.superlib.com";
+//         	var protocol = "https"
+//             var ttl = 0;
+//             var src = encodeURIComponent('https://' + host + '/oh/wopi/files/@/wFileId?wFileId=' + encodeURIComponent(fileUrl));
+//             if (type == 'ppt' || type == 'pptx') {
+//                 src = protocol + '://' + host + '/p/PowerPointFrame.aspx?PowerPointView=ChromelessView&Embed=1&ui=zh-CN&rs=zh-CN&access_token_ttl=' + ttl + '&WOPISrc=' + src;
+//             } else if (type == 'doc' || type == 'docx') {
+//                 src = protocol + '://' + host + '/wv/wordviewerframe.aspx?embed=1&ui=zh-CN&rs=zh-CN&access_token_ttl=' + ttl + '&WOPISrc=' + src;
+//             } else if (type == 'xls' || type == 'xlsx') {
+//                 src = protocol + '://' + host + '/x/_layouts/xlembed.aspx?wdRepost=1&access_token=&ui=zh-CN&rs=zh-CN&access_token_ttl=' + ttl + '&WOPISrc=' + src;
+//             } else if (type == 'pdf') {
+//                 src = protocol + '://' + host + '/wv/wordviewerframe.aspx?PdfMode=1&embed=1&ui=zh-CN&rs=zh-CN&access_token_ttl=' + ttl + '&WOPISrc=' + src;
+//             } else if (type == 'txt' || type == 'jpg' || type == 'jpeg' || type == 'png' || type == 'gif' || type == 'bmp') {
+//                 src = fileUrl;
+//             } else {
+//                 return;
+//             }
+			//产品（杨杨）要求修改预览地址 不用officeonline的
+			 var src = '';
+	         if (type == 'ppt' || type == 'pptx'
+	        	|| type == 'doc' || type == 'docx'
+	        	|| type == 'xls' || type == 'xlsx'
+	        	|| type == 'pdf') {
+	        	 if(resid){
+	        		src = "https://pan-yz.chaoxing.com/screen/fileinfo_"+resid;
+	        	 }else{
+	        		 src = fileUrl;
+	        	 }
+		     }  else if (type == 'txt' || type == 'jpg' || type == 'jpeg' || type == 'png' || type == 'gif' || type == 'bmp') {
+		         src = fileUrl;
+		     } else {
+		         return;
+		     }
+            return src;
+        }
+
+        //“预览”监听
+        $('.attachPreview').click(function(){
+        	var e = window.event||arguments.callee.caller.arguments[0]
+        	e.stopPropagation();
+        	if(!fileId || fileId==''){
+        		return;
+        	}
+        	window.open(getOfficePrev("https://d0.ananas.chaoxing.com/download/"+fileId,resid,suffix));
+        });
+        
+        //“下载”监听
+        $('.attachDown').click(function(){
+        	var e = window.event||arguments.callee.caller.arguments[0]
+        	e.stopPropagation();
+        	if(!fileId || fileId==''){
+        		return;
+        	}
+        	window.location.href ="https://d0.ananas.chaoxing.com/download/"+fileId ;
+        });
+        //“保存到云盘”监听
+        $('.attachSaveCloud').click(function(){
+        	var e = window.event||arguments.callee.caller.arguments[0]
+        	e.stopPropagation();
+			// 向上层传递消息
+    		var top_parent = RichtextAttachmentUtils.getTopParent();
+			var att_clouddisks =[];
+			att_clouddisks.push(att_clouddisk);
+    		top_parent.postMessage({'msgType':'openCloudPop','att_clouddisks': att_clouddisks}, '*');
+        });
+        //“批量操作”监听
+        $('.attachBatch').click(function(){
+        	var e = window.event||arguments.callee.caller.arguments[0]
+        	e.stopPropagation();
+			// 向上层传递消息
+    		var top_parent = RichtextAttachmentUtils.getTopParent();
+    		top_parent.postMessage({'msgType':'openBatchPop'}, '*');
+        });
+        
+        // 附件点击事件
+        function openClickEvent(){
+        	var e = window.event||arguments.callee.caller.arguments[0]
+        	e.stopPropagation();
+        	if(isAudio && isShareDomain) {
+        		// 分享页采用 audio 标签播放
+        		playMedia(shareCallback);
+        	} else if (!isShareDomain && RichtextAttachmentUtils.isXXT) {
+                // 不是分享页，且是在学习通里面打开的，通过客户端协议去播放
+                RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+            } else if(isAudio || isVideo){
+        		// 处理编辑页和详情页
+        		var top_parent = RichtextAttachmentUtils.getTopParent();
+        		var mediaType = '';
+        		if(isVideo) {
+        			mediaType = "video";
+                } else if(isAudio) {
+                	mediaType = "audio";
+                }
+        		top_parent.postMessage({'msgType':'playMedia','mediaType': mediaType, 'media': att_clouddisk}, '*');
+        	} else if(isDetailPage){
+        		//详情页其它文件附件的有另外的监听，如果有预览，则直接打开预览
+        		if(previewHtml && previewHtml!=''){
+        			var e = window.event||arguments.callee.caller.arguments[0]
+                	e.stopPropagation();
+                	if(!fileId || fileId==''){
+                		return;
+                	}
+                	window.open(getOfficePrev("https://d0.ananas.chaoxing.com/download/"+fileId,resid,suffix));
+        		}
+        		return ;
+        	} else {
+        		 RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '', isVideo);
+        	}
+        };
+        
+        window.addEventListener('message', function (e) {
+            var data = e.data;
+            if(data.msgType == 'dataChanged') {
+                if ((json.att_video && data.cid == json.att_video.cid) || (json.att_clouddisk && data.cid == json.att_clouddisk.cid)) {
+                    // 附件数据变化
+                    jsonOld = data.name;
+                    try{
+                        json = JSON.parse(jsonOld);
+                    } catch(e) {
+                        console.log(e);
+                    }
+                    if(json) {
+                        att_clouddisk = json.att_clouddisk;
+                        /* var videoLogo = att_video.coverUrl || "images/icon_gray.png";
+                        $(".attach-box").find('img').eq(0).attr('src', videoLogo); */
+                    }
+                }
+            } else if(data.onlyAnimation) {
+                // 笔记详情页和投屏页是通过插件播放的，只需要处理展示效果
+                // TODO 待处理云盘音频播放逻辑
+                /* if(data.action == 'play' && data.cid == att_clouddisk.fileId) {
+                    // 播放音频时，给播放的那个音频加上播放动画
+                    $('.attach-box .img').addClass("animate");
+                } else {
+                    $('.attach-box .img').removeClass("animate");
+                } */
+            } else if(data.cid != att_clouddisk.fileId && myaudio){
+            	// 当前音频不是点击播放那个
+            	if (myaudio.isPlaying) {
+            		 myaudio.audioPause();
+                     $('.attach-box').removeClass('loading').removeClass('play').addClass('pause');
+            	}
+            	$('.playmask').hide();
+            }
+        })
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+            //alert("获取信息失败");
+        }
+        var att_meeting = json.att_meeting_note || "";
+        if (att_meeting != "") {
+        	var meetingTitle = att_meeting.title || "";
+            var meetingCon = att_meeting.abstracttext || "";
+            var fromer = att_meeting.username || "";
+            var meetingLogo;
+            if(att_meeting.notetype == 4){
+                meetingLogo = "images/icon_meeting_comment.png" || "images/icon_gray.png";
+                var html = '<div class="attach_item insertMeetingnote">'+
+                            '<div class="img squareRadius"><img src="'+meetingLogo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2>'+meetingTitle+'</h2>'+
+                                '<p class="aside">'+meetingCon+'</p>'+
+                                '<p class="from">来自-<span class="blue">'+fromer+'</span>的评论汇总</p>'+
+                            '</div>'+
+                        '</div>';
+            }else{
+                meetingLogo = "images/icon_meeting_note.png" || "images/icon_gray.png";
+                var html = '<div class="attach_item insertMeetingnote">'+
+                            '<div class="img squareRadius"><img src="'+meetingLogo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2>'+meetingTitle+'</h2>'+
+                                '<p class="aside">'+meetingCon+'</p>'+
+                                '<p class="from">来自-<span class="blue">'+fromer+'</span>的会议笔记</p>'+
+                            '</div>'+
+                        '</div>';
+            }
+            $(".attach-box").append(html);
+            if(json.cid){
+                var cid=json.cid;
+                if(meetingTitle!='' && meetingCon==''){//只有标题
+                    $('.attach_infor h2').css('margin-bottom','0')
+                    $('.attach_infor h2').addClass('words2');
+                }else if(meetingTitle=='' && meetingCon!=''){//只有正文
+                    $('.attach_infor h2').css('margin-bottom','0')
+                    $('.attach_infor .aside').css({'font-size':'15px','color':'#333333','line-height':'1.23'}).addClass('words2');
+                }else if(meetingTitle!='' && meetingCon!=''){//标题和正文同时存在
+                    $('.attach_infor .aside').addClass('words2');
+                    $('.attach_infor h2').css('margin-bottom','3px');
+                    $('.attach_infor p.from').css('margin-top','3px');
+                    if($('.attach_infor .aside').height()>$('.attach_infor .aside').css('line-height').substr(0,$('.attach_infor .aside').css('line-height').length-2)){
+                        $('.attach_item').css('height','90px');
+                    }
+                }
+            }
+        }
+        
+        function openClickEvent(){
+            //RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

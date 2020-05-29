@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<title></title>
+</head>
+<!--[if IE]>
+    <script src="js/base64.js"></script>
+<![endif]-->
+<body>
+    <div class="attach-box" id="attach-box"></div>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="js/attachment_util_new.js"></script>
+    <script type="text/javascript" src="js/clamp.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../themes/iframe.css"/>
+    <script type="text/javascript">
+        var jsonOld = RichtextAttachmentUtils.b64DecodeUnicode(window.name);
+        try{
+            json = JSON.parse(jsonOld);
+        }catch(e){
+            console.log(e);
+            json = "";
+        }
+        if(json == ""){
+        	//alert("获取信息失败");
+        }
+        var att_course = json.att_course || "";
+        if (att_course != "") {
+        	var courseLogo = att_course.knowledgeLogo || "images/icon_gray.png";
+            courseLogo = courseLogo.replace(/.webp/g, '.jpg');
+            if (courseLogo.indexOf("chaoxing.com") != -1) {
+                courseLogo = courseLogo.replace(/origin/g, '100_100cQ50');
+            }
+            var courseName = att_course.courseName || "";
+            var knowledgeLabel = att_course.knowledgeLabel || "";
+            var html = '<div class="attach_item insertCourse">'+
+                            '<div class="img squareRadius"><img src="'+courseLogo+'"></div>'+
+                            '<div class="attach_infor">'+
+                                '<h2 class="words2">'+knowledgeLabel+'</h2>'+
+                                '<p class="aside">'+courseName+'</p>'+
+                            '</div>'+
+                        '</div>';
+            $(".attach-box").append(html);
+            
+            if(json.cid){
+                var cid=json.cid;
+                $('.attach_infor h2').css('white-space','normal')
+                $('.attach_infor h2').each(function(index, element) {
+                    $clamp(element, { clamp: 2, useNativeClamp: false });
+                });
+                
+                var top_parent = RichtextAttachmentUtils.getTopParent();
+                if(top_parent) {
+                	// 修改附件高度
+                    top_parent.postMessage({'msgType':'heightChanged','cid': cid, 'height':$('.attach-box').height()}, '*');
+                }
+                
+            }
+        }
+        function openClickEvent(){
+        	RichtextAttachmentUtils.clickAttachment(JSON.parse("["+jsonOld+"]"), 'attach-box', '');
+        };
+    </script>
+</body>
+</html>

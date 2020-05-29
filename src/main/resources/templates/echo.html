@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script th:src="@{/assets/editor-mirror/jquery-1.7.1.min.js}" type="text/javascript" src="jquery-1.7.1.min.js"></script>
+    <script th:src="@{/assets/editor-mirror/ueditor4thirdparty/rich.text.util.js}"></script>
+</head>
+<script type="text/javascript">
+    RichTextUitl.loadEditorProfile();
+</script>
+
+<div class="wrap">
+    <script id="container" name="content" type="text/plain"></script>
+</div>
+<script type="text/javascript">
+    RichTextUitl.initUEditor("", window.localStorage.getItem("data"), "");
+</script>
+</body>
+</html>

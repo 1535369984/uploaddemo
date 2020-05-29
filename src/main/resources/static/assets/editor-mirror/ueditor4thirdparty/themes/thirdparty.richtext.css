@@ -1,0 +1,124 @@
+@charset "UTF-8";
+
+.richtext {
+	font-size: 14px;
+}
+
+.richtext .editor-image {
+	display: block;
+	max-width: 100%;
+	margin: 5px auto;
+}
+
+.richtext img {
+	display: block;
+	margin: 0 auto;
+}
+
+.richtext p {
+	line-height: 1.9em
+}
+
+.richtext p span {
+	line-height: 1.5em;
+}
+
+.richtext h1 {
+	font-size: 30px;
+	line-height: 2.8;
+	color: #000000;
+}
+
+.richtext h2 {
+	font-size: 17px !important;
+	line-height: 2.65 !important;
+	color: #000000;
+}
+
+.richtext h3 {
+	font-size: 14px;
+	line-height: 2.7;
+	color: #000000;
+}
+
+.richtext h1, .richtext h2, .richtext h3, .richtext h4,
+	.richtext h5, .richtext h6 {
+	font-weight: bold
+}
+
+.richtext ol, .richtext ul {
+	padding-left: 20px;
+	width: unset !important;
+}
+
+.richtext li {
+	padding: 0
+}
+
+.richtext  h1, .richtext  h2, .richtext  h3, .richtext  h4,
+	.richtext  h5, .richtext  h6 {
+	font-weight: bold;
+}
+
+.richtext ul, .richtext ul li {
+	list-style-type: disc !important;
+}
+
+.richtext ol, .richtext ol li {
+	list-style-type: decimal !important;
+}
+
+.richtext b, .richtext strong {
+	font-weight: bold !important
+}
+
+.richtext i {
+	font-style: italic !important;
+}
+.popUeditorDelShowHide .fl{float: left;}
+.popUeditorDelShowHide .fr{float: right;}
+.popUeditorDelShowHide a{text-decoration: none;}
+.maskDivForDel{display: none;width:100%;height:100%;position:fixed;top:0;left:0;background: rgba(16,26,41,0.76);z-index:10000}
+.popUeditorDelShowHide .wid440{width:440px;max-height:360px}
+
+.popUeditorDelShowHide .popDiv{min-height:100px;background: #FFFFFF;border-radius: 10px;position:fixed;left:50%;overflow:hidden}
+.popUeditorDelShowHide .popHead{line-height:60px;height:60px;background: #FFFFFF;box-shadow: inset 0 -1px 0 0 rgba(242,242,242,0.80);position:absolute;left:0;top:0;width:100%;padding:0 30px;box-sizing: border-box;background:#fff}
+.popUeditorDelShowHide .popClose{display:inline-block;width:18px;height:18px;margin-top:21px}
+.popUeditorDelShowHide .popClose img{display: block;}
+.popUeditorDelShowHide .het62{width:100%;height:60px;}
+.popUeditorDelShowHide .popBottom{width:100%;height:53px;background:#fff;position:absolute;left:0;bottom:0;}
+.popUeditorDelShowHide .popBottom a{margin-right:30px;}
+.popUeditorDelShowHide .het72{width:100%;height:72px;}
+.popUeditorDelShowHide .popWord{padding:26px 30px;}
+.popUeditorDelShowHide .fs14{font-size:14px;}
+.popUeditorDelShowHide .fs16{font-size:16px;}
+.popUeditorDelShowHide .fs18{font-size:18px;}
+/*color*/
+.popUeditorDelShowHide .colorDeep{ color:#181E33;}/*一级文字 深色*/
+.popUeditorDelShowHide .colorIn{ color:#646873;}/*二级文字 适中*/
+.popUeditorDelShowHide .colorShallow{ color:#A8A8B3;}/*三级文字 浅色*/
+
+/************渐变按钮样式************/
+.popUeditorDelShowHide .jb_btn{display:inline-block;box-shadow: 0 3px 12px 0 rgba(39,125,255,0.30);color: #FFFFFF!important;text-align:center;line-height:36px;border-radius: 20px;}
+.popUeditorDelShowHide .jb_btn_92{width:92px;height:36px;background:url(default/images/jb_btn_92.png) no-repeat 0 0;}
+.popUeditorDelShowHide .jb_btn_92:hover{background-position:0 -48px;}
+.popUeditorDelShowHide .jb_btn_92:active{background-position:left -96px}
+.popUeditorDelShowHide .jb_btn_92_disable{width:92px;height:36px;background:url(default/images/jb_disable.png) no-repeat;box-shadow: 0 4px 11px 0 rgba(86,82,255,0.17);
+.popUeditorDelShowHide border-radius: 20px;}
+.popUeditorDelShowHide .btnBlue{border: 1px solid #94C1FF;border-radius: 20px;display:inline-block;width:90px;height:34px;text-align:center;line-height:34px;color: #3A8BFF!important;}
+.popUeditorDelShowHide .btnBlue:hover{background: #EAF0FF;}
+.popUeditorDelShowHide .btnBlue:active{background: #E4ECFF;}
+.popUeditorDelShowHide .btn_92_cancel:hover{background:none}
+.popUeditorDelShowHide .btn_92_cancel:active{background:none}
+
+.maskDiv {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(16,26,41,0.76);
+    z-index: 10000;
+}
+
